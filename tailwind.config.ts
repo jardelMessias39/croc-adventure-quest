@@ -18,6 +18,12 @@ export default {
 			}
 		},
 		extend: {
+			backgroundImage: {
+				'gradient-swamp': 'var(--gradient-swamp)',
+				'gradient-water': 'var(--gradient-water)',
+				'gradient-hero': 'var(--gradient-hero)',
+				'gradient-game-bg': 'var(--gradient-game-bg)',
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -26,7 +32,8 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -51,6 +58,12 @@ export default {
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
+				},
+				game: {
+					water: 'hsl(var(--game-water))',
+					grass: 'hsl(var(--game-grass))',
+					danger: 'hsl(var(--game-danger))',
+					reward: 'hsl(var(--game-reward))'
 				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
