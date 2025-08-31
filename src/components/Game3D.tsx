@@ -56,6 +56,7 @@ const CrocodileGame3D = () => {
   const [preys, setPreys] = useState<Prey[]>([]);
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
   const [isMoving, setIsMoving] = useState({ forward: false, backward: false, left: false, right: false });
+  const [isMobile, setIsMobile] = useState(false);
 
   const energyRequirements = [150, 300, 450, 700];
   const phaseNames = ['Filhote', 'Jovem', 'Adulto', 'Gigante'];
@@ -79,8 +80,20 @@ const CrocodileGame3D = () => {
     renderer.setSize(mountRef.current.offsetWidth, mountRef.current.offsetHeight);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(window.devicePixelRatio);
     rendererRef.current = renderer;
     mountRef.current.appendChild(renderer.domElement);
+
+    // Handle resize
+    const handleResize = () => {
+      if (camera && renderer && mountRef.current) {
+        camera.aspect = mountRef.current.offsetWidth / mountRef.current.offsetHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(mountRef.current.offsetWidth, mountRef.current.offsetHeight);
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
@@ -290,22 +303,47 @@ const CrocodileGame3D = () => {
     setGameState(prev => ({ ...prev, position: { x: position.x, y: position.y, z: position.z } }));
   }, [isMoving, gameStarted, gameOver, gameState.phase]);
 
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768 || 'ontouchstart' in window);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Mobile touch controls
+  const handleTouchStart = useCallback((direction: string) => {
+    setIsMoving(prev => ({ ...prev, [direction]: true }));
+  }, []);
+
+  const handleTouchEnd = useCallback((direction: string) => {
+    setIsMoving(prev => ({ ...prev, [direction]: false }));
+  }, []);
+
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!gameStarted || gameOver) return;
 
-      switch (e.key) {
-        case 'ArrowUp':
+      switch (e.key.toLowerCase()) {
+        case 'arrowup':
+        case 'w':
           setIsMoving(prev => ({ ...prev, forward: true }));
           break;
-        case 'ArrowDown':
+        case 'arrowdown':
+        case 's':
           setIsMoving(prev => ({ ...prev, backward: true }));
           break;
-        case 'ArrowLeft':
+        case 'arrowleft':
+        case 'a':
           setIsMoving(prev => ({ ...prev, left: true }));
           break;
-        case 'ArrowRight':
+        case 'arrowright':
+        case 'd':
           setIsMoving(prev => ({ ...prev, right: true }));
           break;
         case 'r':
@@ -330,17 +368,21 @@ const CrocodileGame3D = () => {
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowUp':
+      switch (e.key.toLowerCase()) {
+        case 'arrowup':
+        case 'w':
           setIsMoving(prev => ({ ...prev, forward: false }));
           break;
-        case 'ArrowDown':
+        case 'arrowdown':
+        case 's':
           setIsMoving(prev => ({ ...prev, backward: false }));
           break;
-        case 'ArrowLeft':
+        case 'arrowleft':
+        case 'a':
           setIsMoving(prev => ({ ...prev, left: false }));
           break;
-        case 'ArrowRight':
+        case 'arrowright':
+        case 'd':
           setIsMoving(prev => ({ ...prev, right: false }));
           break;
       }
@@ -640,10 +682,11 @@ const CrocodileGame3D = () => {
             <div>
               <h3 className="font-bold text-primary mb-2">Controles:</h3>
               <ul className="text-sm space-y-1">
-                <li>🎮 Setas: Mover</li>
+                <li>🎮 Setas/WASD: Mover</li>
                 <li>⚔️ Ctrl+R: Atacar com cauda</li>
                 <li>🍽️ Ctrl+C: Comer presa</li>
                 <li>🌪️ Ctrl+G: Girar (Fase 2+)</li>
+                <li>📱 Touch: Controles na tela</li>
               </ul>
             </div>
             <div>
@@ -671,34 +714,45 @@ const CrocodileGame3D = () => {
   return (
     <div className="min-h-screen bg-gradient-game-bg relative">
       {/* Game HUD */}
-      <div className="absolute top-0 left-0 right-0 z-10 p-4 bg-black/20 backdrop-blur-sm">
+      <div className="absolute top-0 left-0 right-0 z-10 p-2 md:p-4 bg-black/20 backdrop-blur-sm">
         <div className="flex justify-between items-center max-w-6xl mx-auto">
-          <div className="grid grid-cols-4 gap-4 text-white">
+          <div className={`grid gap-2 md:gap-4 text-white ${isMobile ? 'grid-cols-2 text-xs' : 'grid-cols-4'}`}>
             <div>
-              <div className="text-sm opacity-80">Fase</div>
-              <div className="text-xl font-bold">{gameState.phase} - {phaseNames[gameState.phase - 1]}</div>
+              <div className="text-xs md:text-sm opacity-80">Fase</div>
+              <div className={`font-bold ${isMobile ? 'text-sm' : 'text-xl'}`}>
+                {gameState.phase} - {isMobile ? phaseNames[gameState.phase - 1].slice(0, 6) : phaseNames[gameState.phase - 1]}
+              </div>
             </div>
             <div>
-              <div className="text-sm opacity-80">Vidas</div>
-              <div className="text-xl font-bold">{'❤️'.repeat(gameState.lives)}</div>
+              <div className="text-xs md:text-sm opacity-80">Vidas</div>
+              <div className={`font-bold ${isMobile ? 'text-sm' : 'text-xl'}`}>{'❤️'.repeat(gameState.lives)}</div>
             </div>
-            <div>
-              <div className="text-sm opacity-80">Energia</div>
-              <div className="text-xl font-bold">{gameState.energy}</div>
-              <Progress 
-                value={(gameState.energy / energyRequirements[gameState.phase - 1]) * 100} 
-                className="w-24 h-2" 
-              />
-            </div>
-            <div>
-              <div className="text-sm opacity-80">Clima</div>
-              <div className="text-xl">{gameState.weatherType === 'sunny' ? '☀️' : '🌧️'}</div>
-            </div>
+            {!isMobile && (
+              <>
+                <div>
+                  <div className="text-sm opacity-80">Energia</div>
+                  <div className="text-xl font-bold">{gameState.energy}</div>
+                  <Progress 
+                    value={(gameState.energy / energyRequirements[gameState.phase - 1]) * 100} 
+                    className="w-24 h-2" 
+                  />
+                </div>
+                <div>
+                  <div className="text-sm opacity-80">Clima</div>
+                  <div className="text-xl">{gameState.weatherType === 'sunny' ? '☀️' : '🌧️'}</div>
+                </div>
+              </>
+            )}
           </div>
           
           <div className="text-right text-white">
-            <div className="text-sm opacity-80">Pontuação</div>
-            <div className="text-2xl font-bold">{gameState.score}</div>
+            <div className="text-xs md:text-sm opacity-80">Pontuação</div>
+            <div className={`font-bold ${isMobile ? 'text-lg' : 'text-2xl'}`}>{gameState.score}</div>
+            {isMobile && (
+              <div className="text-xs mt-1">
+                E: {gameState.energy} | {gameState.weatherType === 'sunny' ? '☀️' : '🌧️'}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -735,9 +789,82 @@ const CrocodileGame3D = () => {
         </div>
       )}
 
+      {/* Mobile Touch Controls */}
+      {isMobile && gameStarted && !gameOver && (
+        <div className="absolute bottom-4 left-4 right-4 z-10">
+          <div className="flex justify-between items-end">
+            {/* Movement Controls */}
+            <div className="grid grid-cols-3 gap-2 w-32">
+              <div></div>
+              <Button
+                className="bg-white/20 hover:bg-white/30 border-white/40 text-white h-12 w-12 p-0"
+                onTouchStart={() => handleTouchStart('forward')}
+                onTouchEnd={() => handleTouchEnd('forward')}
+                onMouseDown={() => handleTouchStart('forward')}
+                onMouseUp={() => handleTouchEnd('forward')}
+              >
+                ↑
+              </Button>
+              <div></div>
+              <Button
+                className="bg-white/20 hover:bg-white/30 border-white/40 text-white h-12 w-12 p-0"
+                onTouchStart={() => handleTouchStart('left')}
+                onTouchEnd={() => handleTouchEnd('left')}
+                onMouseDown={() => handleTouchStart('left')}
+                onMouseUp={() => handleTouchEnd('left')}
+              >
+                ←
+              </Button>
+              <Button
+                className="bg-white/20 hover:bg-white/30 border-white/40 text-white h-12 w-12 p-0"
+                onTouchStart={() => handleTouchStart('backward')}
+                onTouchEnd={() => handleTouchEnd('backward')}
+                onMouseDown={() => handleTouchStart('backward')}
+                onMouseUp={() => handleTouchEnd('backward')}
+              >
+                ↓
+              </Button>
+              <Button
+                className="bg-white/20 hover:bg-white/30 border-white/40 text-white h-12 w-12 p-0"
+                onTouchStart={() => handleTouchStart('right')}
+                onTouchEnd={() => handleTouchEnd('right')}
+                onMouseDown={() => handleTouchStart('right')}
+                onMouseUp={() => handleTouchEnd('right')}
+              >
+                →
+              </Button>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2">
+              <Button
+                className="bg-red-500/80 hover:bg-red-600/80 text-white h-12 w-16 p-0"
+                onClick={handleTailAttack}
+              >
+                ⚔️
+              </Button>
+              <Button
+                className="bg-green-500/80 hover:bg-green-600/80 text-white h-12 w-16 p-0"
+                onClick={handleEat}
+              >
+                🍽️
+              </Button>
+              {gameState.abilities.includes('bite_spin') && (
+                <Button
+                  className="bg-purple-500/80 hover:bg-purple-600/80 text-white h-12 w-16 p-0"
+                  onClick={handleBiteSpin}
+                >
+                  🌪️
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Controls Help */}
       <div className="absolute bottom-4 left-4 text-white/80 text-sm">
-        <p>🎮 Setas: Mover | ⚔️ Ctrl+R: Atacar | 🍽️ Ctrl+C: Comer</p>
+        <p className={isMobile ? "hidden" : ""}>🎮 Setas/WASD: Mover | ⚔️ Ctrl+R: Atacar | 🍽️ Ctrl+C: Comer</p>
       </div>
     </div>
   );
