@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
+import crocodileTexture from '../assets/crocodile-detailed.png';
 
 interface GameState {
   phase: number;
@@ -137,39 +138,34 @@ const CrocodileGame3D = () => {
   const createCrocodile = () => {
     const crocodileGroup = new THREE.Group();
     
-    // Body
-    const bodyGeometry = new THREE.CylinderGeometry(0.8, 1.2, 4, 8);
-    const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0x2d5016 });
-    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-    body.rotation.z = Math.PI / 2;
-    body.castShadow = true;
-    crocodileGroup.add(body);
-
-    // Head
-    const headGeometry = new THREE.ConeGeometry(1, 2, 8);
-    const head = new THREE.Mesh(headGeometry, bodyMaterial);
-    head.position.set(2.5, 0, 0);
-    head.rotation.z = Math.PI / 2;
-    head.castShadow = true;
-    crocodileGroup.add(head);
-
-    // Tail
-    const tailGeometry = new THREE.ConeGeometry(0.3, 3, 6);
-    const tail = new THREE.Mesh(tailGeometry, bodyMaterial);
-    tail.position.set(-3.5, 0, 0);
-    tail.rotation.z = -Math.PI / 2;
-    tail.castShadow = true;
-    crocodileGroup.add(tail);
-
-    // Eyes
-    const eyeGeometry = new THREE.SphereGeometry(0.2, 8, 8);
-    const eyeMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
-    const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-    leftEye.position.set(3, 0.5, 0.3);
-    const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
-    rightEye.position.set(3, 0.5, -0.3);
-    crocodileGroup.add(leftEye);
-    crocodileGroup.add(rightEye);
+    // Load crocodile texture
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load(crocodileTexture);
+    
+    // Create a plane with the crocodile image
+    const crocodileGeometry = new THREE.PlaneGeometry(6, 3);
+    const crocodileMaterial = new THREE.MeshLambertMaterial({ 
+      map: texture,
+      transparent: true,
+      side: THREE.DoubleSide
+    });
+    
+    const crocodileSprite = new THREE.Mesh(crocodileGeometry, crocodileMaterial);
+    crocodileSprite.rotation.x = -Math.PI / 2; // Lay flat on ground
+    crocodileSprite.position.y = 0.1; // Slightly above ground
+    crocodileSprite.castShadow = true;
+    crocodileGroup.add(crocodileSprite);
+    
+    // Add simple collision box (invisible)
+    const collisionGeometry = new THREE.BoxGeometry(5, 1, 2.5);
+    const collisionMaterial = new THREE.MeshBasicMaterial({ 
+      transparent: true, 
+      opacity: 0,
+      visible: false 
+    });
+    const collisionBox = new THREE.Mesh(collisionGeometry, collisionMaterial);
+    collisionBox.position.y = 0.5;
+    crocodileGroup.add(collisionBox);
 
     crocodileGroup.position.set(0, 1, 0);
     crocodileRef.current = crocodileGroup;
