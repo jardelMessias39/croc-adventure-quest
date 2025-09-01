@@ -138,36 +138,65 @@ const CrocodileGame3D = () => {
   const createCrocodile = () => {
     const crocodileGroup = new THREE.Group();
     
-    // Load crocodile texture
-    const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load(crocodileTexture);
-    
-    // Create a plane with the crocodile image
-    const crocodileGeometry = new THREE.PlaneGeometry(6, 3);
-    const crocodileMaterial = new THREE.MeshLambertMaterial({ 
-      map: texture,
-      transparent: true,
-      side: THREE.DoubleSide
-    });
-    
-    const crocodileSprite = new THREE.Mesh(crocodileGeometry, crocodileMaterial);
-    crocodileSprite.rotation.x = -Math.PI / 2; // Lay flat on ground
-    crocodileSprite.position.y = 0.1; // Slightly above ground
-    crocodileSprite.castShadow = true;
-    crocodileGroup.add(crocodileSprite);
-    
-    // Add simple collision box (invisible)
-    const collisionGeometry = new THREE.BoxGeometry(5, 1, 2.5);
-    const collisionMaterial = new THREE.MeshBasicMaterial({ 
-      transparent: true, 
-      opacity: 0,
-      visible: false 
-    });
-    const collisionBox = new THREE.Mesh(collisionGeometry, collisionMaterial);
-    collisionBox.position.y = 0.5;
-    crocodileGroup.add(collisionBox);
+    // Body (main cylinder for crocodile body)
+    const bodyGeometry = new THREE.CylinderGeometry(0.8, 1.2, 4, 8);
+    const bodyMaterial = new THREE.MeshLambertMaterial({ color: 0x2d5016 }); // Dark green
+    const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    body.rotation.z = Math.PI / 2; // Horizontal orientation
+    body.castShadow = true;
+    crocodileGroup.add(body);
 
-    crocodileGroup.position.set(0, 1, 0);
+    // Head (cone for crocodile snout)
+    const headGeometry = new THREE.ConeGeometry(1, 2.5, 8);
+    const headMaterial = new THREE.MeshLambertMaterial({ color: 0x3d6026 }); // Slightly lighter green
+    const head = new THREE.Mesh(headGeometry, headMaterial);
+    head.position.set(3, 0, 0);
+    head.rotation.z = Math.PI / 2;
+    head.castShadow = true;
+    crocodileGroup.add(head);
+
+    // Tail (cone for crocodile tail)
+    const tailGeometry = new THREE.ConeGeometry(0.3, 3, 6);
+    const tailMaterial = new THREE.MeshLambertMaterial({ color: 0x2d5016 });
+    const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+    tail.position.set(-3.5, 0, 0);
+    tail.rotation.z = -Math.PI / 2;
+    tail.castShadow = true;
+    crocodileGroup.add(tail);
+
+    // Eyes (red spheres)
+    const eyeGeometry = new THREE.SphereGeometry(0.15, 8, 8);
+    const eyeMaterial = new THREE.MeshLambertMaterial({ color: 0xff4444 }); // Bright red eyes
+    const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+    leftEye.position.set(3.8, 0.3, 0.4);
+    const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+    rightEye.position.set(3.8, 0.3, -0.4);
+    crocodileGroup.add(leftEye);
+    crocodileGroup.add(rightEye);
+
+    // Legs (small cylinders)
+    const legGeometry = new THREE.CylinderGeometry(0.2, 0.3, 0.8, 6);
+    const legMaterial = new THREE.MeshLambertMaterial({ color: 0x2d5016 });
+    
+    // Front legs
+    const frontLeftLeg = new THREE.Mesh(legGeometry, legMaterial);
+    frontLeftLeg.position.set(1.5, -1, 0.8);
+    const frontRightLeg = new THREE.Mesh(legGeometry, legMaterial);
+    frontRightLeg.position.set(1.5, -1, -0.8);
+    
+    // Back legs  
+    const backLeftLeg = new THREE.Mesh(legGeometry, legMaterial);
+    backLeftLeg.position.set(-1.5, -1, 0.8);
+    const backRightLeg = new THREE.Mesh(legGeometry, legMaterial);
+    backRightLeg.position.set(-1.5, -1, -0.8);
+    
+    crocodileGroup.add(frontLeftLeg);
+    crocodileGroup.add(frontRightLeg);
+    crocodileGroup.add(backLeftLeg);
+    crocodileGroup.add(backRightLeg);
+
+    // Position crocodile at origin, elevated slightly above ground
+    crocodileGroup.position.set(0, 1.5, 0);
     crocodileRef.current = crocodileGroup;
     sceneRef.current?.add(crocodileGroup);
   };
