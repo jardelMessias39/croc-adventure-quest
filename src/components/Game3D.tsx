@@ -72,7 +72,7 @@ const CrocodileGame3D = () => {
 
     // Camera
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 10, 20);
+    camera.position.set(0, 15, 25); // Ajustado para melhor visualização
     cameraRef.current = camera;
 
     // Renderer
@@ -293,10 +293,12 @@ const CrocodileGame3D = () => {
     position.x = Math.max(-90, Math.min(90, position.x));
     position.z = Math.max(-90, Math.min(90, position.z));
 
-    // Update camera to follow crocodile
+    // Update camera to follow crocodile with adaptive zoom
     if (cameraRef.current) {
+      const zoomDistance = 15 + (gameState.crocodileSize * 5); // Zoom se adapta ao tamanho
       cameraRef.current.position.x = position.x;
-      cameraRef.current.position.z = position.z + 20;
+      cameraRef.current.position.y = 8 + (gameState.crocodileSize * 3);
+      cameraRef.current.position.z = position.z + zoomDistance;
       cameraRef.current.lookAt(position);
     }
 
@@ -620,7 +622,7 @@ const CrocodileGame3D = () => {
       }
       
       toast.info(`Clima mudou: ${gameState.weatherType === 'sunny' ? 'Sol' : 'Chuva'}`);
-    }, 30000); // Change weather every 30 seconds
+    }, 600000); // Change weather every 10 minutes (600,000ms)
 
     return () => clearInterval(weatherInterval);
   }, [gameState.weatherType]);
