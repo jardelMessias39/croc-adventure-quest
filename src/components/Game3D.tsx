@@ -308,11 +308,26 @@ const CrocodileGame3D = () => {
 
     const speed = 0.3 + (gameState.phase - 1) * 0.1;
     const position = crocodileRef.current.position;
+    
+    console.log('Movement state:', isMoving);
+    console.log('Current position:', position.x, position.y, position.z);
 
-    if (isMoving.forward) position.z -= speed;
-    if (isMoving.backward) position.z += speed;
-    if (isMoving.left) position.x -= speed;
-    if (isMoving.right) position.x += speed;
+    if (isMoving.forward) {
+      position.z -= speed;
+      console.log('Moving forward');
+    }
+    if (isMoving.backward) {
+      position.z += speed;
+      console.log('Moving backward');
+    }
+    if (isMoving.left) {
+      position.x -= speed;
+      console.log('Moving left');
+    }
+    if (isMoving.right) {
+      position.x += speed;
+      console.log('Moving right');
+    }
 
     // Keep crocodile in bounds
     position.x = Math.max(-90, Math.min(90, position.x));
