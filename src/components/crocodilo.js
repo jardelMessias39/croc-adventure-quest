@@ -20,7 +20,7 @@ const crocodilo = new THREE.Group();
 // Corpo
 const corpo = new THREE.Mesh(
   new THREE.CylinderGeometry(0.5, 0.5, 3, 32),
-  new THREE.MeshStandardMaterial({ color: 0x228B22 })
+  new THREE.MeshStandardMaterial({ color: 0x0d5016 }) // Verde escuro mais visível
 );
 corpo.rotation.z = Math.PI / 2;
 crocodilo.add(corpo);
@@ -28,7 +28,7 @@ crocodilo.add(corpo);
 // Cabeça
 const cabeca = new THREE.Mesh(
   new THREE.ConeGeometry(0.4, 0.8, 32),
-  new THREE.MeshStandardMaterial({ color: 0x228B22 })
+  new THREE.MeshStandardMaterial({ color: 0x0d5016 }) // Verde escuro mais visível
 );
 cabeca.position.set(1.9, 0, 0);
 crocodilo.add(cabeca);
@@ -36,7 +36,7 @@ crocodilo.add(cabeca);
 // Cauda
 const cauda = new THREE.Mesh(
   new THREE.ConeGeometry(0.3, 1, 32),
-  new THREE.MeshStandardMaterial({ color: 0x228B22 })
+  new THREE.MeshStandardMaterial({ color: 0x0d5016 }) // Verde escuro mais visível
 );
 cauda.position.set(-2, 0, 0);
 cauda.rotation.z = Math.PI;
@@ -47,7 +47,7 @@ for (let i = -1; i <= 1; i += 2) {
   for (let j = -0.5; j <= 0.5; j += 1) {
     const pata = new THREE.Mesh(
       new THREE.SphereGeometry(0.2, 16, 16),
-      new THREE.MeshStandardMaterial({ color: 0x006400 })
+      new THREE.MeshStandardMaterial({ color: 0x2d4a2e }) // Verde mais escuro para contraste
     );
     pata.position.set(i, j, -0.3);
     crocodilo.add(pata);
@@ -57,7 +57,7 @@ for (let i = -1; i <= 1; i += 2) {
 // Olhos
 const olhoEsq = new THREE.Mesh(
   new THREE.SphereGeometry(0.1, 16, 16),
-  new THREE.MeshStandardMaterial({ color: 0xff0000 })
+  new THREE.MeshStandardMaterial({ color: 0xffff00 }) // Amarelo para mais visibilidade
 );
 olhoEsq.position.set(2, 0.2, 0.2);
 crocodilo.add(olhoEsq);
@@ -71,8 +71,8 @@ scene.add(crocodilo);
 // Zoom adaptativo
 let fase = 1;
 function atualizarZoom() {
-  const zoom = 5 + fase * 2;
-  camera.position.set(zoom, zoom, zoom);
+  const zoom = 4 + fase * 1.5; // Câmera mais próxima
+  camera.position.set(zoom, zoom * 0.8, zoom); // Posição melhor para visualização
   camera.lookAt(crocodilo.position);
 }
 
