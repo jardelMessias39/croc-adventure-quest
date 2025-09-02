@@ -68,6 +68,14 @@ crocodilo.add(olhoDir);
 
 scene.add(crocodilo);
 
+// Cubo de teste para verificar renderização
+const teste = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 1, 1),
+  new THREE.MeshStandardMaterial({ color: 0xff0000 })
+);
+teste.position.set(0, 0, 2); // Posicionar o cubo em uma posição visível
+scene.add(teste);
+
 // Posicionamento fixo da câmera
 camera.position.set(10, 5, 10);
 camera.lookAt(crocodilo.position);
